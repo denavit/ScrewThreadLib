@@ -200,7 +200,7 @@ class Assembly:
         if ASs_eqn == '4a':
             ASs = self.ASs_min_FEDSTD_4a()
         elif ASs_eqn == '4b':
-            raise NotImplementedError(f'ASs_FEDSTD_4b is not yet implemented')
+            raise ValueError(f'ASs_FEDSTD_4b is not yet implemented')
         else:
             raise ValueError(f'Invalid value for ASs_eqn: {ASs_eqn} (need ''4a'' or ''4b'')')
 
@@ -244,7 +244,7 @@ class Assembly:
         if ASn_eqn == '2a':
             ASn = self.ASn_min_FEDSTD_2a()
         elif ASn_eqn == '2b':
-            raise NotImplementedError(f'ASn_FEDSTD_2a is not yet implemented')
+            raise ValueError(f'ASn_FEDSTD_2a is not yet implemented')
         else:
             raise ValueError(f'Invalid value for As_eqn: {ASn_eqn} (need ''2a'' or ''2b'')')
                
