@@ -163,7 +163,7 @@ class Assembly:
 
     def LEr_FEDSTD_13(self, As_eqn='1a'):
         '''
-        Length of engagemnet required for tensile failure based on FED-STD-H28/2B (1991), Table II.B.1, Formulas (13)
+        Length of engagemnet required for tensile failure based on FED-STD-H28/2B (1991), Table II.B.1, Formula (13)
             (based upon combined shear failure of external and internal threads)
         
         Arguments:
@@ -183,7 +183,7 @@ class Assembly:
 
     def LEr_FEDSTD_14(self, As_eqn='1a', ASs_eqn='4a'):
         '''
-        Length of engagemnet required for tensile failure based on FED-STD-H28/2B (1991), Table II.B.1, Formulas (14)
+        Length of engagemnet required for tensile failure based on FED-STD-H28/2B (1991), Table II.B.1, Formula (14)
             (based upon shear of external thread)
         
         Arguments:
@@ -209,7 +209,7 @@ class Assembly:
         
     def LEr_FEDSTD_15(self, As_eqn='1a'):
         '''
-        Length of engagemnet required for tensile failure based on FED-STD-H28/2B (1991), Table II.B.1, Formulas (15)
+        Length of engagemnet required for tensile failure based on FED-STD-H28/2B (1991), Table II.B.1, Formula (15)
             (based upon shear of external thread)
         
         Arguments:
@@ -227,8 +227,8 @@ class Assembly:
         
     def LEr_FEDSTD_16(self, As_eqn='1a', ASn_eqn='2a'):
         '''
-        Length of engagemnet required for tensile failure based on FED-STD-H28/2B (1991), Table II.B.1, Formulas (15)
-            (based upon shear of external thread)
+        Length of engagemnet required for tensile failure based on FED-STD-H28/2B (1991), Table II.B.1, Formula (16)
+            (based upon shear of internal thread)
         
         Arguments:
         As_eqn --- denotes which equation to use for As ('1a' or '1b', default = '1a')
@@ -250,6 +250,13 @@ class Assembly:
                
         R2 = self.UTSn / self.UTSs
         LEr = (2 * As / ASn) / R2
+        # FED-STD-H28/2B (1991), Table II.B.1, Formula (16) is 
+        #   LE = "LE from (15)" x R1/R2
+        # where
+        #   "LE from (15)" = 2 As / ASs   
+        #   R1 = ASs/ASn
+        # The equation used in this function is algebraically identical to the equation in 
+        # FED-STD-H28/2B and does not require evaluation of ASs
         return LEr  
         
 
