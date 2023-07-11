@@ -113,8 +113,8 @@ class Assembly:
         
         Note: numbers with decmials replaced with equivalent mathematcal expressions.
         '''
-        if (self.d < 0.250) and (not override_limit):
-            raise ValueError('ASn_FEDSTD_3 should not be used with d less than 0.250 inch')
+        if (self.dbsc < 0.250) and (not override_limit):
+            raise ValueError('ASn_FEDSTD_3 should not be used with dbsc less than 0.250 inch')
         ASn = pi * self.D2bsc * (3 / 4) * LE
         return ASn     
      
