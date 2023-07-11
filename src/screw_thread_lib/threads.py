@@ -275,5 +275,118 @@ class Assembly:
             LEr_13 = self.LEr_FEDSTD_13(As_eqn)
             LEr_16 = self.LEr_FEDSTD_16(As_eqn, ASn_eqn)
             LEr = max(LEr_13,LEr_16)
-    
         return LEr
+
+    def As_ISO(self):
+        """
+        Tensile stress area based on ISO/TR 16224:2012(E), Section 4.2.2.2
+        """
+        d3 = self.d1bsc - (self.H / 6)
+        As = pi / 4 * ((self.d2bsc + d3) / 2) ** 2
+        return As
+
+    def ASb_ISO(self, LE=1, use_Dm=True):
+        """
+        Shear Area, External Threads (Bolt) based on ISO/TR 16224:2012(E), Section 4.2.3.1
+
+        Arguments:
+        LE --- length of engagement (default = 1)
+        use_Dm --- Denotes whether to use the full equation with Dm or a simplified equation (default = True)
+
+        Note: numbers with decimals replaced with equivalent mathematical expressions.
+        """
+        if use_Dm:
+            Dm = 1.026 * self.D1bsc
+            ASb = (0.6 * (LE / self.p) * pi * self.D1bsc * (self.p / 2 + (self.d2bsc - self.D1bsc) / sqrt(3))) + \
+                  (0.4 * (LE / self.p) * pi * Dm * (self.p / 2 + (self.d2bsc - Dm) / sqrt(3)))
+        else:
+            ASb = (LE / self.p) * pi * self.D1bsc * (self.p / 2 + (self.d2bsc - self.D1bsc) / sqrt(3))
+        return ASb
+
+    def ASn_ISO(self, LE=1):
+        """
+        Shear Area, Internal Threads (Bolt) based on ISO/TR 16224:2012(E), Section 4.2.3.1
+
+        Arguments:
+        LE --- length of engagement (default = 1)
+        """
+        ASn = (LE / self.p) * pi * self.dbsc * (self.p / 2 + (self.dbsc - self.d2bsc) / sqrt(3))
+        return ASn
+
+    def C1_ISO(self, s):
+        """
+        Modification factor for nut dilation based on ISO/TR 16224:2012(E), Section 4.2.3.1
+
+        Arguments:
+        s --- width across flats of the nut
+        """
+        if 1.4 <= s / self.dbsc <= 1.9:
+            C1 = (-1) * (s / self.dbsc) ** 2 + 3.8 * (s / self.dbsc) - 2.6
+        else:
+            raise ValueError('s/dbsc not in range between 1.4 and 1.9')
+        return C1
+
+    def C2_ISO(self, use_Dm=True):
+        """
+        Modification factor for thread bending effect based on ISO/TR 16224:2012(E), Section 4.2.3.1
+
+        Arguments:
+        use_Dm --- Denotes whether to use the full equation with Dm with ASb or a simplified equation (default = True)
+        """
+        Rs = (self.UTSn * self.ASn_ISO()) / (self.UTSs * self.ASb_ISO(1, use_Dm))
+        return C2_ISO(Rs)
+
+    def C3_ISO(self, use_Dm=True):
+        """
+        Modification factor for thread bending effect based on ISO/TR 16224:2012(E), Section 4.2.3.1
+
+        Arguments:
+        use_Dm --- Denotes whether to use the full equation with Dm with ASb or a simplified equation (default = True)
+        """
+        Rs = (self.UTSn * self.ASn_ISO()) / (self.UTSs * self.ASb_ISO(1, use_Dm))
+        return C3_ISO(Rs)
+
+    def LEr_ISO(self, s, use_Dm=True):
+        """
+        Length of engagement required for tensile failure based on Analysis and Design of Threaded Assemblies,
+            E.M. Alexander
+
+        Arguments:
+        s --- width across flats of the nut
+        use_Dm --- Denotes whether to use the full equation with Dm with ASb or a simplified equation (default = True)
+        """
+        LEr1 = self.As_ISO() / (0.6 * self.ASb_ISO(1, use_Dm)  * self.C1_ISO(s) * self.C2_ISO())
+        LEr2 = (self.As_ISO() * self.UTSs) / (0.6 * self.UTSn * self.ASn_ISO() * self.C1_ISO(s) * self.C3_ISO())
+        LEr = max(LEr1, LEr2)
+        return LEr
+
+def C2_ISO(Rs):
+    """
+    Modification factor for thread bending effect based on ISO/TR 16224:2012(E), Section 4.2.3.1, Equation (6)
+
+    Arguments:
+    Rs --- Strength Ratio
+    """
+    if Rs <= 1:
+        C2 = 0.897
+    elif 1 < Rs < 2.2:
+        C2 = 5.594 - 13.682 * Rs + 14.107 * Rs ** 2 - 6.057 * Rs ** 3 + 0.9353 * Rs ** 4
+    else:
+        raise ValueError('Rs not in range, Rs must be < 2.2')
+    return C2
+
+
+def C3_ISO(Rs):
+    """
+    Modification factor for thread bending effect based on ISO/TR 16224:2012(E), Section 4.2.3.1, Equation (6)
+
+    Arguments:
+    Rs --- Strength Ratio
+    """
+    if Rs >= 1:
+        C3 = 0.897
+    elif 0.4 < Rs < 1:
+        C3 = 0.728 + 1.769 * Rs - 2.896 * Rs ** 2 + 1.296 * Rs ** 3
+    else:
+        raise ValueError('C3 not in range, Rs must be > 0.4')
+    return C3
