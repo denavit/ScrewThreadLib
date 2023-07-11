@@ -1,12 +1,13 @@
 from math import pi,sqrt
 
+
 class Assembly:
     def __init__(self, thread_data, UTSs=None, UTSn=None):
         '''
         Define Assembly object
         
         Arguments:
-        thread_data --- a dict incuding the following entries
+        thread_data --- a dict including the following entries
             n     --- number of threads per inch
             dbsc  --- major diameter, external thread, basic value
             dmin  --- major diameter, external thread, minimum value
@@ -62,7 +63,7 @@ class Assembly:
         '''
         Tensile stress area based on FED-STD-H28/2B (1991), Table II.B.1, Formula (1a)
         
-        Note: numbers with decmials replaced with equivalent mathematcal expressions.
+        Note: numbers with decimals replaced with equivalent mathematical expressions.
         '''
         As = pi * (self.d2bsc / 2 - 3 * self.H / 16) ** 2
         return As
@@ -71,7 +72,7 @@ class Assembly:
         '''
         Tensile stress area based on FED-STD-H28/2B (1991), Table II.B.1, Formula (1b)
         
-        Note: numbers with decmials replaced with equivalent mathematcal expressions.
+        Note: numbers with decimals replaced with equivalent mathematical expressions.
         '''
         As = pi / 4 * (self.dbsc - (9 * sqrt(3)) / (16 * self.n)) ** 2
         return As
@@ -80,13 +81,12 @@ class Assembly:
         '''
         Tensile stress area based on Machinery's Handbook, 31st Edition Eq. (2b) on Page 1668
 
-        Note: numbers with decmials replaced with equivalent mathematcal expressions.
+        Note: numbers with decimals replaced with equivalent mathematical expressions.
         '''
         if (self.UTSs <= 180000) and (not override_limit):
             raise ValueError('As_MH_2b is only for steels of over 180,000 psi ultimate tensile strength')
         As = pi * ( (self.d2min / 2) - (3 * sqrt(3)) / (32 * self.n) ) ** 2
         return As
-     
      
     def ASn_min_FEDSTD_2a(self, LE=1):
         '''
@@ -94,13 +94,12 @@ class Assembly:
             (minimum material external and internal threads)
         
         Arguments:
-        LE --- length of engagment (default = 1)
+        LE --- length of engagement (default = 1)
         
-        Note: numbers with decmials replaced with equivalent mathematcal expressions.
+        Note: numbers with decimals replaced with equivalent mathematical expressions.
         '''
         ASn = pi * self.n * LE * self.dmin * ((1 / (2 * self.n)) + ((1 / sqrt(3)) * (self.dmin - self.D2max)))
         return ASn
-
 
     def ASn_FEDSTD_3(self, LE=1, override_limit=False):
         '''
@@ -108,16 +107,15 @@ class Assembly:
             (simplified: for d equal to or greater than 0.250 inch)
         
         Arguments:
-        LE --- length of engagment (default = 1)
+        LE --- length of engagement (default = 1)
         override_limit --- option to ignore limit on diameter (default = False)
         
-        Note: numbers with decmials replaced with equivalent mathematcal expressions.
+        Note: numbers with decimals replaced with equivalent mathematical expressions.
         '''
         if (self.dbsc < 0.250) and (not override_limit):
             raise ValueError('ASn_FEDSTD_3 should not be used with dbsc less than 0.250 inch')
         ASn = pi * self.D2bsc * (3 / 4) * LE
         return ASn     
-     
      
     def ASs_min_FEDSTD_4a(self, LE=1):
         '''
@@ -125,51 +123,48 @@ class Assembly:
             (minimum material external and internal threads)
         
         Arguments:
-        LE --- length of engagment (default = 1)
+        LE --- length of engagement (default = 1)
         
-        Note: numbers with decmials replaced with equivalent mathematcal expressions.
+        Note: numbers with decimals replaced with equivalent mathematical expressions.
         '''
         ASs = pi * self.n * LE * self.D1max * ((1 / (2 * self.n)) + ((1 / sqrt(3)) * (self.d2min - self.D1max)))
         return ASs
 
-   
     def ASs_FEDSTD_5(self, LE=1):
         '''
         Shear area, external threads based on FED-STD-H28/2B (1991), Table II.B.1, Formula (5)
             (simplified)
         
         Arguments:
-        LE --- length of engagment (default = 1)
+        LE --- length of engagement (default = 1)
         
-        Note: numbers with decmials replaced with equivalent mathematcal expressions.
+        Note: numbers with decimals replaced with equivalent mathematical expressions.
         '''
         ASs = pi * self.d2bsc * (5 / 8) * LE
         return ASs 
 
-        
     def ASs_max_FEDSTD_6b(self, LE=1):
         '''
         Shear area, external threads based on FED-STD-H28/2B (1991), Table II.B.1, Formula (6b)
             (basic size external and internal threads)
         
         Arguments:
-        LE --- length of engagment (default = 1)
+        LE --- length of engagement (default = 1)
         
-        Note: numbers with decmials replaced with equivalent mathematcal expressions.
+        Note: numbers with decimals replaced with equivalent mathematical expressions.
         '''
         ASs = pi * self.D1bsc * 0.75 * LE
         return ASs
 
-
     def LEr_FEDSTD_13(self, As_eqn='1a'):
         '''
-        Length of engagemnet required for tensile failure based on FED-STD-H28/2B (1991), Table II.B.1, Formula (13)
+        Length of engagement required for tensile failure based on FED-STD-H28/2B (1991), Table II.B.1, Formula (13)
             (based upon combined shear failure of external and internal threads)
         
         Arguments:
         As_eqn --- denotes which equation to use for As ('1a' or '1b', default = '1a')
         
-        Note: numbers with decmials replaced with equivalent mathematcal expressions.
+        Note: numbers with decimals replaced with equivalent mathematical expressions.
         '''
         if As_eqn == '1a':
             As = self.As_FEDSTD_1a()
@@ -180,10 +175,9 @@ class Assembly:
         LEr = (4 * As) / (pi * self.d2bsc)
         return LEr
 
-
     def LEr_FEDSTD_14(self, As_eqn='1a', ASs_eqn='4a'):
         '''
-        Length of engagemnet required for tensile failure based on FED-STD-H28/2B (1991), Table II.B.1, Formula (14)
+        Length of engagement required for tensile failure based on FED-STD-H28/2B (1991), Table II.B.1, Formula (14)
             (based upon shear of external thread)
         
         Arguments:
@@ -209,7 +203,7 @@ class Assembly:
         
     def LEr_FEDSTD_15(self, As_eqn='1a'):
         '''
-        Length of engagemnet required for tensile failure based on FED-STD-H28/2B (1991), Table II.B.1, Formula (15)
+        Length of engagement required for tensile failure based on FED-STD-H28/2B (1991), Table II.B.1, Formula (15)
             (based upon shear of external thread)
         
         Arguments:
@@ -227,8 +221,8 @@ class Assembly:
         
     def LEr_FEDSTD_16(self, As_eqn='1a', ASn_eqn='2a'):
         '''
-        Length of engagemnet required for tensile failure based on FED-STD-H28/2B (1991), Table II.B.1, Formula (16)
-            (based upon shear of internal thread)
+        Length of engagement required for tensile failure based on FED-STD-H28/2B (1991), Table II.B.1, Formula (16)
+            (based upon shear of external thread)
         
         Arguments:
         As_eqn --- denotes which equation to use for As ('1a' or '1b', default = '1a')
@@ -259,18 +253,19 @@ class Assembly:
         # FED-STD-H28/2B and does not require evaluation of ASs
         return LEr  
         
-
     def LEr_FEDSTD(self, As_eqn='1a', ASs_eqn='4a', ASn_eqn='2a', combined_failure_range=0.05):
         '''
-        Length of engagemnet required for tensile failure based on FED-STD-H28/2B (1991), Table II.B.1, Formulas (13), (15), and (16)
+        Length of engagement required for tensile failure based on FED-STD-H28/2B (1991), Table II.B.1, Formulas (13),
+            (15), and (16)
         
         Arguments:
         As_eqn --- denotes which equation to use for As ('1a' or '1b', default = '1a')
         ASn_eqn --- denotes which equation to use for ASn ('2a' or '2b', default = '2a')
         ASs_eqn --- denotes which equation to use for ASn ('4a' or '4b', default = '4a')
-        combined_failure_range --- parameter that defines the limit of applicibility of the combined failure mode (default = 0.05)s
+        combined_failure_range --- parameter that defines the limit of applicability of the combined failure mode
+            (default = 0.05)s
         '''
-        R1 = self.ASs_max_FEDSTD_6b()/self.ASn_min_FEDSTD_2a() # @todo - code in options here see formulat (8)
+        R1 = self.ASs_max_FEDSTD_6b() / self.ASn_min_FEDSTD_2a()  # @todo - code in options here see formula (8)
         R2 = self.UTSn / self.UTSs
         if R1/R2 < (1-combined_failure_range):
             # External thread failure, Formula (15)
