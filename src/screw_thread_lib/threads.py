@@ -316,14 +316,22 @@ class Assembly:
     def C1_ISO(self, s):
         """
         Modification factor for nut dilation based on ISO/TR 16224:2012(E), Section 4.2.3.1
+        
+        C1 is undefined for when s/D < 1.4
+        C1 taken equal to 1.0 when s/D >= 1.8
 
         Arguments:
         s --- width across flats of the nut
         """
-        if 1.4 <= s / self.dbsc <= 1.9:
-            C1 = (-1) * (s / self.dbsc) ** 2 + 3.8 * (s / self.dbsc) - 2.6
+        s_over_d = s / self.dbsc
+        
+        if s_over_d < 1.4:
+            raise ValueError('C1 is undefined because s/dbsc < 1.4')
+        elif s_over_d < 1.8:
+            C1 = (-1) * s_over_d ** 2 + 3.8 * s_over_d - 2.6
         else:
-            raise ValueError('s/dbsc not in range between 1.4 and 1.9')
+            C1 = 1.0
+
         return C1
 
     def C2_ISO(self, use_Dm=True):
