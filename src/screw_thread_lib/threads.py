@@ -318,21 +318,13 @@ class Assembly:
         Modification factor for nut dilation based on ISO/TR 16224:2012(E), Section 4.2.3.1
         
         C1 is undefined for when s/D < 1.4
-        C1 taken equal to 1.0 when s/D >= 1.8
+        C1 taken equal to 1.0 when s/D >= 1.8 (this is slighly different than the equation in ISO/TR 16224:2012(E))
 
         Arguments:
         s --- width across flats of the nut
         """
         s_over_d = s / self.dbsc
-        
-        if s_over_d < 1.4:
-            raise ValueError('C1 is undefined because s/dbsc < 1.4')
-        elif s_over_d < 1.8:
-            C1 = (-1) * s_over_d ** 2 + 3.8 * s_over_d - 2.6
-        else:
-            C1 = 1.0
-
-        return C1
+        return C1_ISO(s_over_d)
 
     def C2_ISO(self, use_Dm=True):
         """
@@ -367,6 +359,30 @@ class Assembly:
         LEr2 = (self.As_ISO() * self.UTSs) / (0.6 * self.UTSn * self.ASn_ISO() * self.C1_ISO(s) * self.C3_ISO())
         LEr = max(LEr1, LEr2)
         return LEr
+
+
+def C1_ISO(s_over_d,C1_out_of_range=None):
+    """
+    Modification factor for nut dilation based on ISO/TR 16224:2012(E), Section 4.2.3.1, Equation (6)
+    
+    C1 is undefined for when s/D < 1.4 (function returns C1_out_of_range if the argument is given)
+    C1 taken equal to 1.0 when s/D >= 1.8 (this is slighly different than the equation in ISO/TR 16224:2012(E))
+    
+    Arguments:
+    s_over_d --- ratio of width across flats of the nut to XXXXX
+    C1_out_of_range --- value to return if s/D is out of range (i.e., s/D < 1.4) (default = None)
+                        if "None", the the function raises a ValueError if out of range
+    """
+    if s_over_d < 1.4:
+        if C1_out_of_range is None:
+            raise ValueError('C1 is undefined because s/dbsc < 1.4')
+        else:
+            C1 = C1_out_of_range
+    elif s_over_d < 1.8:
+        C1 = (-1) * s_over_d ** 2 + 3.8 * s_over_d - 2.6
+    else:
+        C1 = 1.0
+    return C1
 
 
 def C2_ISO(Rs,C2_out_of_range=None):
