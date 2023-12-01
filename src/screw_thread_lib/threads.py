@@ -368,33 +368,44 @@ class Assembly:
         LEr = max(LEr1, LEr2)
         return LEr
 
-def C2_ISO(Rs):
+
+def C2_ISO(Rs,C2_out_of_range=None):
     """
     Modification factor for thread bending effect based on ISO/TR 16224:2012(E), Section 4.2.3.1, Equation (6)
 
     Arguments:
     Rs --- Strength Ratio
+    C2_out_of_range --- value to return if Rs is out of range (i.e., Rs >= 2.2) (default = None)
+                        if "None", the the function raises a ValueError if out of range
     """
     if Rs <= 1:
         C2 = 0.897
     elif 1 < Rs < 2.2:
         C2 = 5.594 - 13.682 * Rs + 14.107 * Rs ** 2 - 6.057 * Rs ** 3 + 0.9353 * Rs ** 4
     else:
-        raise ValueError('Rs not in range, Rs must be < 2.2')
+        if C2_out_of_range is None:
+            raise ValueError('Rs not in range, Rs must be < 2.2')
+        else:
+            C2 = C2_out_of_range
     return C2
 
 
-def C3_ISO(Rs):
+def C3_ISO(Rs,C3_out_of_range=None):
     """
     Modification factor for thread bending effect based on ISO/TR 16224:2012(E), Section 4.2.3.1, Equation (6)
 
     Arguments:
     Rs --- Strength Ratio
+    C3_out_of_range --- value to return if Rs is out of range (i.e., Rs < 2.2) (default = None)
+                        if "None", the the function raises a ValueError if out of range
     """
     if Rs >= 1:
         C3 = 0.897
     elif 0.4 < Rs < 1:
         C3 = 0.728 + 1.769 * Rs - 2.896 * Rs ** 2 + 1.296 * Rs ** 3
     else:
-        raise ValueError('C3 not in range, Rs must be > 0.4')
+        if C3_out_of_range is None:
+            raise ValueError('C3 not in range, Rs must be > 0.4')
+        else:
+            C3 = C3_out_of_range
     return C3
