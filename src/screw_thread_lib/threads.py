@@ -310,7 +310,7 @@ class Assembly:
         Arguments:
         LE --- length of engagement (default = 1)
         """
-        ASn = (LE / self.p) * pi * self.dbsc * (self.p / 2 + (self.dbsc - self.d2bsc) / sqrt(3))
+        ASn = (LE / self.p) * pi * self.dbsc * (self.p / 2 + (self.dbsc - self.D2bsc) / sqrt(3))
         return ASn
 
     def C1_ISO(self, s):
