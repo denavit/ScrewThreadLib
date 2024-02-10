@@ -2,7 +2,8 @@ from math import pi, sqrt
 
 
 class Assembly:
-    def __init__(self, thread_data, UTSs=None, UTSn=None):
+    def __init__(self, thread_data, UTSs=None, UTSn=None, 
+            use_Dm_ISO=True, dims_ISO='basic'):
         '''
         Define Assembly object
 
@@ -20,6 +21,12 @@ class Assembly:
             D2max --- pitch diameter, internal thread, maximum value
         UTSs --- ultimate tensile strength of externally threaded part
         UTSn --- ultimate tensile strength of internally threaded part
+        
+        use_Dm_ISO --- Boolean indicating whether to use the full ISO equation 
+            with Dm with ASb or a simplified equation (default = True)
+        dims_ISO --- String indicating whether to use basic values or 
+            minimum material condition values for variables 
+            ('basic' or 'min', default = 'basic')
         '''
         self.n = thread_data['n']
         self.dbsc = thread_data['dbsc']
@@ -33,15 +40,19 @@ class Assembly:
         self.D2max = thread_data.get('D2max', None)
         self.UTSs = UTSs
         self.UTSn = UTSn
+        
+        # Options for evaluating the ISO equations
+        self.use_Dm_ISO = use_Dm_ISO 
+        self.dims_ISO = dims_ISO
 
     @classmethod
-    def from_ASME_B11_UN_2A2B(cls, thread_designation, UTSs=None, UTSn=None):
+    def from_ASME_B11_UN_2A2B(cls, thread_designation, *args, **kwargs):
         '''
         Define Assembly object based on thread data from ASME B1.1
         '''
         from screw_thread_lib.data import ASME_B11_UN_2A2B_dict
         thread_data = ASME_B11_UN_2A2B_dict[thread_designation]
-        c = cls(thread_data, UTSs, UTSn)
+        c = cls(thread_data, *args, **kwargs)
         c.thread_designation = thread_designation
         return c
 
@@ -285,22 +296,33 @@ class Assembly:
         As = pi / 4 * ((self.d2bsc + d3) / 2) ** 2
         return As
 
-    def ASb_ISO(self, LE=1, use_Dm=True):
+    def ASb_ISO(self, LE=1):
         """
         Shear Area, External Threads (Bolt) based on ISO/TR 16224:2012(E), Section 4.2.3.1
 
         Arguments:
         LE --- length of engagement (default = 1)
-        use_Dm --- Denotes whether to use the full equation with Dm or a simplified equation (default = True)
 
         Note: numbers with decimals replaced with equivalent mathematical expressions.
         """
-        if use_Dm:
-            Dm = 1.026 * self.D1bsc
-            ASb = (0.6 * (LE / self.p) * pi * self.D1bsc * (self.p / 2 + (self.d2bsc - self.D1bsc) / sqrt(3))) + \
-                  (0.4 * (LE / self.p) * pi * Dm * (self.p / 2 + (self.d2bsc - Dm) / sqrt(3)))
+
+        if self.dims_ISO == 'basic':
+            if self.use_Dm_ISO:
+                Dm = 1.026 * self.D1bsc
+                ASb = (0.6 * (LE / self.p) * pi * self.D1bsc * (self.p / 2 + (self.d2bsc - self.D1bsc) / sqrt(3))) + \
+                      (0.4 * (LE / self.p) * pi * Dm * (self.p / 2 + (self.d2bsc - Dm) / sqrt(3)))
+            else:
+                ASb = (LE / self.p) * pi * self.D1bsc * (self.p / 2 + (self.d2bsc - self.D1bsc) / sqrt(3))
+        elif self.dims_ISO == 'min':
+            if self.use_Dm_ISO:
+                Dm = Dm = 1.026 * self.D1max
+                ASb = (0.6 * (LE / self.p) * pi * self.D1max * (self.p / 2 + (self.d2min - self.D1max) / sqrt(3))) + \
+                      (0.4 * (LE / self.p) * pi * Dm * (self.p / 2 + (self.d2min - Dm) / sqrt(3)))
+            else:
+                ASb = (LE / self.p) * pi * self.D1max * (self.p / 2 + (self.d2min - self.D1max) / sqrt(3))
         else:
-            ASb = (LE / self.p) * pi * self.D1bsc * (self.p / 2 + (self.d2bsc - self.D1bsc) / sqrt(3))
+            raise ValueError(f'Unknown option for dims_ISO: {self.dims_ISO}')
+
         return ASb
 
     def ASn_ISO(self, LE=1):
@@ -310,7 +332,13 @@ class Assembly:
         Arguments:
         LE --- length of engagement (default = 1)
         """
-        ASn = (LE / self.p) * pi * self.dbsc * (self.p / 2 + (self.dbsc - self.D2bsc) / sqrt(3))
+        if self.dims_ISO == 'basic':
+            ASn = (LE / self.p) * pi * self.dbsc * (self.p / 2 + (self.dbsc - self.D2bsc) / sqrt(3))
+        elif self.dims_ISO == 'min':
+            ASn = (LE / self.p) * pi * self.dmin * (self.p / 2 + (self.dmin - self.D2max) / sqrt(3))
+        else:
+            raise ValueError(f'Unknown option for dims_ISO: {self.dims_ISO}')
+
         return ASn
 
     def C1_ISO(self, s):
@@ -326,36 +354,29 @@ class Assembly:
         s_over_d = s / self.dbsc
         return C1_ISO(s_over_d)
 
-    def C2_ISO(self, use_Dm=True):
+    def C2_ISO(self):
         """
         Modification factor for thread bending effect based on ISO/TR 16224:2012(E), Section 4.2.3.1
-
-        Arguments:
-        use_Dm --- Denotes whether to use the full equation with Dm with ASb or a simplified equation (default = True)
         """
-        Rs = (self.UTSn * self.ASn_ISO()) / (self.UTSs * self.ASb_ISO(1, use_Dm))
+        Rs = (self.UTSn * self.ASn_ISO()) / (self.UTSs * self.ASb_ISO())
         return C2_ISO(Rs)
 
-    def C3_ISO(self, use_Dm=True):
+    def C3_ISO(self):
         """
         Modification factor for thread bending effect based on ISO/TR 16224:2012(E), Section 4.2.3.1
-
-        Arguments:
-        use_Dm --- Denotes whether to use the full equation with Dm with ASb or a simplified equation (default = True)
         """
-        Rs = (self.UTSn * self.ASn_ISO()) / (self.UTSs * self.ASb_ISO(1, use_Dm))
+        Rs = (self.UTSn * self.ASn_ISO()) / (self.UTSs * self.ASb_ISO())
         return C3_ISO(Rs)
 
-    def LEr_ISO(self, s, use_Dm=True):
+    def LEr_ISO(self, s):
         """
         Length of engagement required for tensile failure based on Analysis and Design of Threaded Assemblies,
             E.M. Alexander
 
         Arguments:
         s --- width across flats of the nut
-        use_Dm --- Denotes whether to use the full equation with Dm with ASb or a simplified equation (default = True)
         """
-        LEr1 = self.As_ISO() / (0.6 * self.ASb_ISO(1, use_Dm)  * self.C1_ISO(s) * self.C2_ISO())
+        LEr1 = self.As_ISO() / (0.6 * self.ASb_ISO() * self.C1_ISO(s) * self.C2_ISO())
         LEr2 = (self.As_ISO() * self.UTSs) / (0.6 * self.UTSn * self.ASn_ISO() * self.C1_ISO(s) * self.C3_ISO())
         LEr = max(LEr1, LEr2)
         return LEr

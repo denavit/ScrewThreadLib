@@ -25,7 +25,9 @@ for i, UTSn in enumerate(UTSn_list):
     LEr_FEDSTD_16[i] = a.LEr_FEDSTD_16()
     LEr_FEDSTD[i] = a.LEr_FEDSTD()
     LEr_ISO[i] = a.LEr_ISO(s)
-    LEr_ISO_without_Dm[i] = a.LEr_ISO(s, use_Dm=False)
+    
+    a.use_Dm_ISO = False
+    LEr_ISO_without_Dm[i] = a.LEr_ISO(s)
 
 # Make Plot
 fig, ax = plt.subplots(figsize=(6.5,3.5))
