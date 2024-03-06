@@ -2,8 +2,8 @@ from math import pi, sqrt
 
 
 class Assembly:
-    def __init__(self, thread_data, UTSs=None, UTSn=None, 
-            use_Dm_ISO=True, dims_ISO='basic'):
+    def __init__(self, thread_data, UTSs=None, UTSn=None,
+                 use_Dm_ISO=True, dims_ISO='basic'):
         '''
         Define Assembly object
 
@@ -21,11 +21,11 @@ class Assembly:
             D2max --- pitch diameter, internal thread, maximum value
         UTSs --- ultimate tensile strength of externally threaded part
         UTSn --- ultimate tensile strength of internally threaded part
-        
-        use_Dm_ISO --- Boolean indicating whether to use the full ISO equation 
+
+        use_Dm_ISO --- Boolean indicating whether to use the full ISO equation
             with Dm with ASb or a simplified equation (default = True)
-        dims_ISO --- String indicating whether to use basic values or 
-            minimum material condition values for variables 
+        dims_ISO --- String indicating whether to use basic values or
+            minimum material condition values for variables
             ('basic' or 'min', default = 'basic')
         '''
         self.n = thread_data['n']
@@ -36,9 +36,9 @@ class Assembly:
         self.D2max = thread_data.get('D2max', None)
         self.UTSs = UTSs
         self.UTSn = UTSn
-        
+
         # Options for evaluating the ISO equations
-        self.use_Dm_ISO = use_Dm_ISO 
+        self.use_Dm_ISO = use_Dm_ISO
         self.dims_ISO = dims_ISO
 
     @classmethod
