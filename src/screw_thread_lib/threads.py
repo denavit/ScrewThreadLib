@@ -46,8 +46,24 @@ class Assembly:
         '''
         Define Assembly object based on thread data from ASME B1.1
         '''
-        from screw_thread_lib.data import ASME_B11_UN_2A2B_dict
-        thread_data = ASME_B11_UN_2A2B_dict[thread_designation]
+        from screw_thread_lib.data import ASME_UN_2A2B_dict
+        thread_data = ASME_UN_2A2B_dict[thread_designation]
+        c = cls(thread_data, *args, **kwargs)
+        c.thread_designation = thread_designation
+        return c
+
+    @classmethod
+    def from_database(cls, database, thread_designation, *args, **kwargs):
+        '''
+        Define Assembly object based on thread data
+        '''
+        if database == 'ASME_UN_2A2B':
+            from screw_thread_lib.data import ASME_UN_2A2B_dict as database
+        elif database == 'ASME_M_6g6H':
+            from screw_thread_lib.data import ASME_M_6g6H_dict as database
+        else:
+            raise ValueError(f'Database not recgonized: {database}')
+        thread_data = database[thread_designation]
         c = cls(thread_data, *args, **kwargs)
         c.thread_designation = thread_designation
         return c
