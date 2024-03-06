@@ -31,12 +31,8 @@ class Assembly:
         self.n = thread_data['n']
         self.dbsc = thread_data['dbsc']
         self.dmin = thread_data.get('dmin', None)
-        self.d1bsc = thread_data.get('d1bsc', None)
-        self.d2bsc = thread_data.get('d2bsc', None)
         self.d2min = thread_data.get('d2min', None)
-        self.D1bsc = thread_data.get('D1bsc', None)
         self.D1max = thread_data.get('D1max', None)
-        self.D2bsc = thread_data.get('D2bsc', None)
         self.D2max = thread_data.get('D2max', None)
         self.UTSs = UTSs
         self.UTSn = UTSn
@@ -63,6 +59,22 @@ class Assembly:
     @property
     def H(self):
         return sqrt(3) / (2 * self.n)
+
+    @property
+    def d1bsc(self):
+        return self.dbsc - 1.25 * self.H
+
+    @property
+    def D1bsc(self):
+        return self.d1bsc
+
+    @property
+    def d2bsc(self):
+        return self.dbsc - 0.75 * self.H
+
+    @property
+    def D2bsc(self):
+        return self.d2bsc
 
     def Absc(self):
         '''
