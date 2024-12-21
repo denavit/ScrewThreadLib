@@ -449,7 +449,7 @@ def C2_ISO(Rs, C2_out_of_range=None):
         C2 = 5.594 - 13.682 * Rs + 14.107 * Rs ** 2 - 6.057 * Rs ** 3 + 0.9353 * Rs ** 4
     else:
         if C2_out_of_range is None:
-            raise ValueError('Rs not in range, Rs must be < 2.2')
+            raise ValueError(f'Rs not in range, {Rs =},  Rs must be < 2.2')
         else:
             C2 = C2_out_of_range
     return C2
